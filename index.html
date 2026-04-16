@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>悬架静挠度与偏频 · 汽车设计第6版 §7.3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0a0e14;--card:#12181f;--card2:#1a2230;--border:#3a4555;
+  --blue:#58a6ff;--blue-dim:#2a4a7f;--green:#3fb950;--green-dim:#1f4a28;
+  --red:#f85149;--red-dim:#4a1510;--orange:#f78166;--orange-dim:#4a2515;
+  --yellow:#e3b341;--yellow-dim:#4a3a10;--purple:#bc8cff;--teal:#39d3f2;
+  --text:#f0f6fc;--muted:#9ca8b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Serif SC',serif;background:var(--bg);color:var(--text);font-size:20px;line-height:1.7;min-height:100vh;overflow-x:hidden}
+.hdr{background:linear-gradient(135deg,#0a0e14,#12181f,#0d1a2e);border-bottom:2px solid var(--border);padding:16px 20px;flex-shrink:0}
+.hdr h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.hdr p{font-size:18px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.fchip{background:var(--blue-dim);border:2px solid var(--blue);border-radius:8px;padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--blue);margin-top:10px;display:inline-block}
+.main{display:flex;flex-direction:column}
+.lp{background:var(--card);border-bottom:2px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:14px}
+.rp{display:flex;flex-direction:column}
+.card{background:var(--card2);border:2px solid var(--border);border-radius:10px;padding:16px}
+.ct{font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:2px solid var(--border);padding-bottom:8px;margin-bottom:12px}
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mbtn{padding:12px 10px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:18px;font-family:'Noto Serif SC',serif;color:var(--muted);text-align:center;transition:all .15s;background:var(--bg)}
+.mbtn .mi{font-size:28px;display:block;margin-bottom:6px}
+.mbtn.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);font-weight:700}
+.slr{margin-bottom:12px}
+.slh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.sll{font-size:20px;font-weight:700}
+.slv{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700}
+.slu{font-size:18px;color:var(--muted);margin-left:2px}
+input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:var(--border);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;border:3px solid var(--bg);cursor:pointer;transition:transform .1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
+.sbl::-webkit-slider-thumb{background:var(--blue)}.sbl{accent-color:var(--blue)}
+.sgr::-webkit-slider-thumb{background:var(--green)}.sgr{accent-color:var(--green)}
+.srd::-webkit-slider-thumb{background:var(--red)}.srd{accent-color:var(--red)}
+.sye::-webkit-slider-thumb{background:var(--yellow)}.sye{accent-color:var(--yellow)}
+.tr{display:flex;justify-content:space-between;font-size:16px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rc{background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:12px}
+.rl{font-size:16px;color:var(--muted);margin-bottom:4px}
+.rv{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700}
+.ru{font-size:16px;color:var(--muted);margin-left:2px}
+.ctbl{width:100%;border-collapse:collapse;font-size:18px;margin-top:10px}
+.ctbl th{font-size:17px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);text-align:left}
+.ctbl td{padding:8px 10px;border-bottom:1px solid #252d38;font-family:'JetBrains Mono',monospace;font-size:18px}
+.ctbl tr:last-child td{border:none}
+.te{color:var(--red);font-weight:700}.tl{color:var(--green);font-weight:700}
+.vr{border-radius:8px;padding:12px 16px;font-size:18px;line-height:1.7;border-left:4px solid}
+.vr.ok{background:var(--green-dim);border-color:var(--green)}
+.vr.warn{background:var(--yellow-dim);border-color:var(--yellow)}
+.vr.bad{background:var(--red-dim);border-color:var(--red)}
+.vr strong{display:block;font-size:20px;margin-bottom:4px}
+.pr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pb{padding:8px 14px;font-size:18px;border:2px solid var(--border);border-radius:6px;cursor:pointer;background:var(--bg);color:var(--muted);transition:all .15s;font-family:'Noto Serif SC',serif}
+.pb:hover{border-color:var(--yellow);color:var(--yellow)}
+.pb.active{border-color:var(--yellow);background:var(--yellow-dim);color:var(--yellow);font-weight:700}
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vb{padding:10px 12px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:18px;text-align:center;color:var(--muted);transition:all .15s;background:var(--bg);font-family:'Noto Serif SC',serif}
+.vb .vi{font-size:24px;display:block;margin-bottom:4px}
+.vb.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);font-weight:700}
+.rrow{display:flex;align-items:center;gap:12px;margin-top:10px}
+.rbig{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;min-width:70px}
+.rb{flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden}
+.rf{height:100%;border-radius:5px;transition:width .3s,background .3s}
+.ni{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:6px;padding:10px 12px;font-size:22px;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.ni:focus{border-color:var(--blue)}
+.sep{border:none;border-top:2px solid var(--border);margin:10px 0}
+.insight{background:linear-gradient(135deg,rgba(63,185,80,.1),rgba(57,211,242,.08));border:2px solid rgba(63,185,80,.4);border-radius:10px;padding:14px 16px;font-size:18px;line-height:1.9}
+.ib{font-weight:700;color:var(--teal);font-size:20px;margin-bottom:6px}
+.cw{padding:16px;min-height:300px;position:relative}
+canvas{display:block;max-width:100%}
+.ts{background:var(--card);border-top:2px solid var(--border);padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.tg{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:18px;color:var(--muted);user-select:none}
+.tg:hover{color:var(--text)}
+.tg input{accent-color:var(--blue);width:18px;height:18px;cursor:pointer}
+.is{background:var(--card);border-top:2px solid var(--border);padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;flex-shrink:0}
+.ic{background:var(--card2);border:2px solid var(--border);border-radius:8px;padding:10px 12px}
+.icl{font-size:16px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.icv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600}
+.reftbl-wrap{background:var(--card);border-top:2px solid var(--border);padding:14px 18px;flex-shrink:0}
+.reftbl-title{font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+.reftbl{width:100%;border-collapse:collapse;font-size:18px}
+.reftbl th{background:rgba(88,166,255,0.15);color:var(--muted);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+.reftbl td{padding:10px 12px;border-bottom:1px solid #252d38;font-family:'JetBrains Mono',monospace;font-size:18px;white-space:nowrap}
+.reftbl tr:last-child td{border-bottom:none}
+.reftbl tr.hl-row td{background:rgba(88,166,255,0.08)}
+.reftbl .fn1{color:var(--blue);font-weight:700}
+.reftbl .fn2{color:var(--green);font-weight:700}
+.reftbl .fok{color:var(--green)}.reftbl .fbad{color:var(--red)}
+#tt{position:fixed;pointer-events:none;display:none;background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:20px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:100;min-width:200px}
+.input-row{display:flex;gap:10px;align-items:center;margin-top:10px}
+.input-row label{font-size:18px;font-weight:700;min-width:80px}
+.input-row input{flex:1}
+.reverse-calc{background:var(--card2);border:2px solid var(--purple);border-radius:10px;padding:16px;margin-top:14px}
+.reverse-calc .ct{color:var(--purple);border-color:var(--purple)}
+@media (max-width:768px){
+  .hdr h1{font-size:22px}
+  .hdr p{font-size:16px}
+  .fchip{font-size:16px;padding:6px 12px}
+  .mode-row{grid-template-columns:1fr}
+  .vg{grid-template-columns:1fr}
+  .rg{grid-template-columns:1fr}
+  .is{grid-template-columns:1fr}
+  canvas{width:100%;height:auto}
+  .slv{font-size:22px}
+  .ni{font-size:20px}
+}
+@media (min-width:769px){
+  body{display:flex;flex-direction:column;height:100vh}
+  .main{display:flex;flex-direction:row;flex:1;overflow:hidden}
+  .lp{width:420px;flex-shrink:0;border-right:2px solid var(--border);border-bottom:none;overflow-y:auto}
+  .rp{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .cw{flex:1;overflow:auto}
+}
+user-select: none
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div><h1>🚗 悬架静挠度 · 偏频关系交互工具</h1>
+  <p>《汽车设计》第6版 §7.3 · 式7-1~7-3 · 完全离线</p></div>
+  <div class="fchip">n₁=√(c₁/m₁)/(2π) → n=√(250/fc)（式7-3）</div>
+</div>
+
+<div class="main">
+<div class="lp">
+
+<div class="card">
+  <div class="ct">分析模式</div>
+  <div class="mode-row">
+    <div class="mbtn active" id="m1b" onclick="setMode(1)">
+      <span class="mi">📐</span><strong>模式①</strong><br><span style="font-size:16px">偏频设计<br>（直接调节fc）</span>
+    </div>
+    <div class="mbtn" id="m2b" onclick="setMode(2)">
+      <span class="mi">⚖️</span><strong>模式②</strong><br><span style="font-size:16px">线性弹簧<br>负载变化分析</span>
+    </div>
+  </div>
+</div>
+
+<div id="pm1">
+  <div class="card">
+    <div class="ct">车型（推荐偏频范围）</div>
+    <div class="vg">
+      <div class="vb active" id="vb-cs" onclick="setVType('car_small')"><span class="vi">🚗</span>乘用车（小）</div>
+      <div class="vb" id="vb-cl" onclick="setVType('car_large')"><span class="vi">🚙</span>乘用车（大）</div>
+      <div class="vb" id="vb-bu" onclick="setVType('bus')"><span class="vi">🚌</span>客　　车</div>
+      <div class="vb" id="vb-tr" onclick="setVType('truck')"><span class="vi">🚛</span>货　　车</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">前轴静挠度 fc1</div>
+    <div class="slr">
+      <div class="slh">
+        <span class="sll">前静挠度</span>
+        <span><span class="slv" id="v-fc1">120</span><span class="slu">mm</span></span>
+      </div>
+      <input type="range" class="sbl" id="sl-fc1" min="30" max="420" value="120" step="1" oninput="updateSlider('fc1',this.value)">
+      <div class="tr"><span>30</span><span>420</span></div>
+    </div>
+    <div class="input-row">
+      <label for="in-fc1">直接输入：</label>
+      <input type="number" class="ni" id="in-fc1" min="30" max="420" value="120" step="1" oninput="updateInput('fc1',this.value)">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">后轴静挠度 fc2</div>
+    <div class="slr">
+      <div class="slh">
+        <span class="sll">后静挠度</span>
+        <span><span class="slv" id="v-fc2">150</span><span class="slu">mm</span></span>
+      </div>
+      <input type="range" class="sgr" id="sl-fc2" min="30" max="420" value="150" step="1" oninput="updateSlider('fc2',this.value)">
+      <div class="tr"><span>30</span><span>420</span></div>
+    </div>
+    <div class="input-row">
+      <label for="in-fc2">直接输入：</label>
+      <input type="number" class="ni" id="in-fc2" min="30" max="420" value="150" step="1" oninput="updateInput('fc2',this.value)">
+    </div>
+  </div>
+
+  <div class="card reverse-calc">
+    <div class="ct">反向计算：目标频率 → 静挠度</div>
+    <p style="font-size:18px;margin-bottom:12px;color:var(--muted)">已知目标频率 n，计算静挠度：fc = 250/n²</p>
+    <div class="input-row">
+      <label for="in-target-n">目标频率 n：</label>
+      <input type="number" class="ni" id="in-target-n" min="0.1" max="5" value="1.5" step="0.01" oninput="calcReverse()">
+      <span style="font-size:18px;color:var(--muted);white-space:nowrap">Hz</span>
+    </div>
+    <div class="rg" style="margin-top:14px">
+      <div class="rc">
+        <div class="rl">计算出的静挠度</div>
+        <div class="rv" id="reverse-fc">111.1</div><span class="ru">mm</span>
+      </div>
+      <div class="rc">
+        <div class="rl">验证频率</div>
+        <div class="rv" id="reverse-n-check">1.50</div><span class="ru">Hz</span>
+      </div>
+    </div>
+    <button onclick="applyReverse('fc1')" style="width:100%;margin-top:10px;padding:12px;font-size:18px;background:var(--blue-dim);color:var(--blue);border:2px solid var(--blue);border-radius:6px;cursor:pointer;font-family:'Noto Serif SC',serif">应用到前轴 fc1</button>
+    <button onclick="applyReverse('fc2')" style="width:100%;margin-top:8px;padding:12px;font-size:18px;background:var(--green-dim);color:var(--green);border:2px solid var(--green);border-radius:6px;cursor:pointer;font-family:'Noto Serif SC',serif">应用到后轴 fc2</button>
+  </div>
+
+  <div class="card">
+    <div class="ct">计算结果</div>
+    <div class="rg">
+      <div class="rc">
+        <div class="rl">前轴偏频 n₁</div>
+        <div class="rv" id="r-n1">1.443</div><span class="ru">Hz</span>
+      </div>
+      <div class="rc">
+        <div class="rl">后轴偏频 n₂</div>
+        <div class="rv" id="r-n2">1.291</div><span class="ru">Hz</span>
+      </div>
+    </div>
+    <table class="ctbl">
+      <tr><th>参数</th><th>数值</th></tr>
+      <tr><td>频率比 n₁/n₂</td><td id="r-ratio">1.118</td></tr>
+      <tr><td>前后挠度差 Δfc</td><td><span id="r-delta-fc">30</span> mm</td></tr>
+      <tr><td>前后频率差 Δn</td><td><span id="r-delta-n">0.152</span> Hz</td></tr>
+    </table>
+    <div class="sep"></div>
+    <div id="verdict" class="vr ok"><strong>✓ 前后偏频匹配合理</strong>n₁/n₂ = 1.118，符合汽车悬架设计要求。</div>
+  </div>
+
+  <div class="card">
+    <div class="ct">快速预设值（基于车型经验）</div>
+    <div class="pr">
+      <div class="pb" onclick="setPreset('car_standard')">标准轿车</div>
+      <div class="pb" onclick="setPreset('car_sport')">运动轿车</div>
+      <div class="pb" onclick="setPreset('suv')">SUV</div>
+      <div class="pb" onclick="setPreset('truck')">货车</div>
+    </div>
+  </div>
+</div>
+
+<div id="pm2" style="display:none">
+  <div class="card">
+    <div class="ct">快速预设（货车场景）</div>
+    <div class="pr">
+      <div class="pb active" onclick="setPreset('truck')">标准货车</div>
+      <div class="pb" onclick="setPreset('bus')">客车</div>
+      <div class="pb" onclick="setPreset('heavy')">重型卡车</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">线性弹簧刚度 c</div>
+    <div class="slr">
+      <div class="slh">
+        <span class="sll">刚度系数 c</span>
+        <span><span class="slv" id="v-c">18000</span><span class="slu">N/m</span></span>
+      </div>
+      <input type="range" class="sye" id="sl-c" min="5000" max="80000" value="18000" step="500" oninput="updateS2('c',this.value)">
+      <div class="tr"><span>5k</span><span>80k</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">簧载质量 m</div>
+    <div class="slr">
+      <div class="slh">
+        <span class="sll">①空载质量 m₀</span>
+        <span><span class="slv srd" id="v-m0">500</span><span class="slu">kg</span></span>
+      </div>
+      <input type="range" class="srd" id="sl-m0" min="200" max="3000" value="500" step="10" oninput="updateS2('m0',this.value)">
+      <div class="tr"><span>200</span><span>3000</span></div>
+    </div>
+    <div class="slr" style="margin-top:12px">
+      <div class="slh">
+        <span class="sll">②满载质量 m_f</span>
+        <span><span class="slv sgr" id="v-mf">1200</span><span class="slu">kg</span></span>
+      </div>
+      <input type="range" class="sgr" id="sl-mf" min="200" max="3000" value="1200" step="10" oninput="updateS2('mf',this.value)">
+      <div class="tr"><span>200</span><span>3000</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">偏频变化分析</div>
+    <div class="rrow">
+      <span class="rbig te" id="big-n0">2.13</span>
+      <div class="rb"><div class="rf" id="bar-range"></div></div>
+      <span class="rbig tl" id="big-nf">1.53</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:16px;color:var(--muted)"><span>空载 n₀ (Hz)</span><span>满载 n_f (Hz)</span></div>
+    <table class="ctbl" style="margin-top:12px">
+      <tr><th>参数</th><th>数值</th></tr>
+      <tr><td>空载静挠度 fc₀</td><td><span id="r2-fc0">275</span> mm</td></tr>
+      <tr><td>满载静挠度 fc_f</td><td><span id="r2-fcf">106</span> mm</td></tr>
+      <tr><td>偏频变化 Δn</td><td class="te"><span id="r2-dn">+0.60</span> Hz</td></tr>
+    </table>
+    <div class="sep"></div>
+    <div id="verdict2" class="vr warn"><strong>⚠ 空载偏频过高</strong>空载工况下，偏频 n₀=2.13 Hz 超出推荐范围，可能导致乘坐舒适性下降。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ct">深度洞察（式7-3 逆向推导）</div>
+  <div class="insight">
+    <div class="ib">💡 为什么 fc=250/n² ？</div>
+    由固有频率公式 n₁=√(c₁/m₁)/(2π)，代入 c₁=m₁g/fc，得：<br>
+    n₁=√(g/fc)/(2π) ≈ √(9.81/fc)/6.28<br>
+    整理后：fc≈250/n₁²（g≈10 m/s² 近似）<br>
+    <strong style="color:var(--teal)">反向设计：</strong>确定目标偏频 n，直接计算所需静挠度。
+  </div>
+</div>
+
+</div>
+
+<div class="rp">
+<div class="cw"><canvas id="cv"></canvas></div>
+<div class="ts">
+  <label class="tg"><input type="checkbox" id="chk-grid" checked onchange="draw()">显示网格</label>
+  <label class="tg"><input type="checkbox" id="chk-range" checked onchange="draw()">显示推荐范围</label>
+  <label class="tg" id="tg-arr" style="display:none"><input type="checkbox" id="chk-arr" checked onchange="draw()">显示变化箭头</label>
+</div>
+<div class="is">
+  <div class="ic"><div class="icl">前偏频 n₁</div><div class="icv" id="i-n1">1.443 Hz</div></div>
+  <div class="ic"><div class="icl">后偏频 n₂</div><div class="icv" id="i-n2">1.291 Hz</div></div>
+  <div class="ic"><div class="icl">频率比</div><div class="icv" id="i-ratio">1.118</div></div>
+  <div class="ic"><div class="icl">前静挠度</div><div class="icv" id="i-fc1">120 mm</div></div>
+  <div class="ic"><div class="icl">后静挠度</div><div class="icv" id="i-fc2">150 mm</div></div>
+</div>
+<div class="reftbl-wrap">
+  <div class="reftbl-title">📚 推荐偏频范围（《汽车设计》第6版 表7-3）</div>
+  <table class="reftbl">
+    <tr><th>车型</th><th>前轴 n₁ (Hz)</th><th>后轴 n₂ (Hz)</th><th>备注</th></tr>
+    <tr id="ref-car-small"><td>乘用车（小）</td><td class="fn1">1.0 ~ 1.45</td><td class="fn2">1.2 ~ 1.75</td><td>轿车、两厢车</td></tr>
+    <tr id="ref-car-large"><td>乘用车（大）</td><td class="fn1">1.05 ~ 1.35</td><td class="fn2">1.35 ~ 1.65</td><td>中大型轿车、SUV</td></tr>
+    <tr id="ref-bus"><td>客车</td><td class="fn1">1.4 ~ 2.0</td><td class="fn2">2.0 ~ 2.6</td><td>空载工况</td></tr>
+    <tr id="ref-truck"><td>货车</td><td class="fn1">1.5 ~ 2.1</td><td class="fn2">2.2 ~ 3.0</td><td>空载工况</td></tr>
+  </table>
+</div>
+</div>
+
+</div>
+
+<div id="tt"></div>
+
+<script>
+let mode=1;
+let vtype='car_small';
+let s2={c:18000,m0:500,mf:1200};
+let showArr=true;
+
+const vrng={
+  car_small:{n1:[1.0,1.45],n2:[1.2,1.75]},
+  car_large:{n1:[1.05,1.35],n2:[1.35,1.65]},
+  bus:{n1:[1.4,2.0],n2:[2.0,2.6]},
+  truck:{n1:[1.5,2.1],n2:[2.2,3.0]}
+};
+
+const presets={
+  car_standard:{fc1:120,fc2:150},
+  car_sport:{fc1:90,fc2:110},
+  suv:{fc1:140,fc2:180},
+  truck:{fc1:80,fc2:55},
+  bus:{c:25000,m0:800,mf:2200},
+  heavy:{c:45000,m0:1200,mf:2800}
+};
+
+function setMode(m){
+  mode=m;
+  document.getElementById('m1b').classList.toggle('active',m===1);
+  document.getElementById('m2b').classList.toggle('active',m===2);
+  document.getElementById('pm1').style.display=m===1?'flex':'none';
+  document.getElementById('pm2').style.display=m===2?'flex':'none';
+  document.getElementById('tg-arr').style.display=m===2?'flex':'none';
+  draw();updateInfo();
+}
+
+function setVType(v){
+  vtype=v;
+  ['vb-cs','vb-cl','vb-bu','vb-tr'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById('vb-'+v.replace('_','')).classList.add('active');
+  ['ref-car-small','ref-car-large','ref-bus','ref-truck'].forEach(id=>document.getElementById(id).classList.remove('hl-row'));
+  document.getElementById('ref-'+v.replace('_','-')).classList.add('hl-row');
+  updateInfo();draw();
+}
+
+function setPreset(p){
+  document.querySelectorAll('.pb').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  if(p in presets){
+    const pr=presets[p];
+    if('fc1'in pr){updateSlider('fc1',pr.fc1);updateSlider('fc2',pr.fc2);}
+    if('c'in pr){updateS2('c',pr.c);updateS2('m0',pr.m0);updateS2('mf',pr.mf);}
+  }
+}
+
+function updateSlider(which,val){
+  val=Math.max(30,Math.min(420,+val));
+  document.getElementById('sl-'+which).value=val;
+  document.getElementById('v-'+which).textContent=Math.round(val);
+  document.getElementById('in-'+which).value=val;
+  updateInfo();draw();
+}
+
+function updateInput(which,val){
+  val=Math.max(30,Math.min(420,+val));
+  document.getElementById('sl-'+which).value=val;
+  document.getElementById('v-'+which).textContent=Math.round(val);
+  updateInfo();draw();
+}
+
+function updateS2(which,val){
+  s2[which]=+val;
+  document.getElementById('v-'+which).textContent=Math.round(val);
+  document.getElementById('sl-'+which).value=val;
+  updateInfo();draw();
+}
+
+function fcToN(fc){return Math.sqrt(250/fc);}
+function cmToFc(m,c){return m*9.81/c*1000;}
+
+function calcReverse(){
+  const n=+document.getElementById('in-target-n').value;
+  if(n<=0||!isFinite(n))return;
+  const fc=250/(n*n);
+  document.getElementById('reverse-fc').textContent=fc.toFixed(1);
+  document.getElementById('reverse-n-check').textContent=n.toFixed(2);
+}
+
+function applyReverse(target){
+  const fc=+document.getElementById('reverse-fc').textContent;
+  updateSlider(target,fc);
+}
+
+function updateInfo(){
+  const fc1=+document.getElementById('sl-fc1').value;
+  const fc2=+document.getElementById('sl-fc2').value;
+  const n1=fcToN(fc1),n2=fcToN(fc2);
+  const ratio=n1/n2;
+
+  document.getElementById('r-n1').textContent=n1.toFixed(3);
+  document.getElementById('r-n2').textContent=n2.toFixed(3);
+  document.getElementById('r-ratio').textContent=ratio.toFixed(3);
+  document.getElementById('r-delta-fc').textContent=Math.abs(fc1-fc2).toFixed(0);
+  document.getElementById('r-delta-n').textContent=Math.abs(n1-n2).toFixed(3);
+
+  document.getElementById('i-n1').textContent=n1.toFixed(3)+' Hz';
+  document.getElementById('i-n2').textContent=n2.toFixed(3)+' Hz';
+  document.getElementById('i-ratio').textContent=ratio.toFixed(3);
+  document.getElementById('i-fc1').textContent=fc1.toFixed(0)+' mm';
+  document.getElementById('i-fc2').textContent=fc2.toFixed(0)+' mm';
+
+  const rng=vrng[vtype];
+  const n1ok=n1>=rng.n1[0]&&n1<=rng.n1[1];
+  const n2ok=n2>=rng.n2[0]&&n2<=rng.n2[1];
+  const vd=document.getElementById('verdict');
+
+  if(n1ok&&n2ok){
+    vd.className='vr ok';
+    vd.innerHTML='<strong>✓ 前后偏频匹配合理</strong>n₁/n₂ = '+ratio.toFixed(3)+'，符合汽车悬架设计要求。';
+  }else if(!n1ok&&!n2ok){
+    vd.className='vr bad';
+    vd.innerHTML='<strong>✗ 前后偏频均不合理</strong>n₁='+n1.toFixed(3)+' Hz，n₂='+n2.toFixed(3)+' Hz 均偏离推荐范围。';
+  }else{
+    vd.className='vr warn';
+    const prob=!n1ok?'前轴偏频 n₁='+n1.toFixed(3)+' Hz':'后轴偏频 n₂='+n2.toFixed(3)+' Hz';
+    vd.innerHTML='<strong>⚠ 部分偏频不合理</strong>'+prob+' 不在推荐范围内。';
+  }
+
+  if(mode===2){
+    const {c,m0,mf}=s2;
+    const fc0=cmToFc(m0,c),fcf=cmToFc(mf,c);
+    const n0=fcToN(fc0),nf=fcToN(fcf);
+    const dn=n0-nf;
+
+    document.getElementById('big-n0').textContent=n0.toFixed(2);
+    document.getElementById('big-nf').textContent=nf.toFixed(2);
+    document.getElementById('r2-fc0').textContent=fc0.toFixed(0);
+    document.getElementById('r2-fcf').textContent=fcf.toFixed(0);
+    document.getElementById('r2-dn').textContent=(dn>=0?'+':'')+dn.toFixed(2);
+
+    const pct=(n0-1.0)/(3.5-1.0)*100;
+    const bar=document.getElementById('bar-range');
+    bar.style.width=Math.min(100,Math.max(0,pct))+'%';
+    bar.style.background=n0>2.5?'var(--red)':n0>2.0?'var(--yellow)':'var(--green)';
+
+    const vd2=document.getElementById('verdict2');
+    const rng=vrng[vtype];
+    if(n0>rng.n1[1]+0.3){
+      vd2.className='vr bad';
+      vd2.innerHTML='<strong>✗ 空载偏频过高</strong>空载工况下，偏频 n₀='+n0.toFixed(2)+' Hz 超出推荐范围，可能导致乘坐舒适性下降。';
+    }else if(nf<rng.n2[0]-0.2){
+      vd2.className='vr bad';
+      vd2.innerHTML='<strong>✗ 满载偏频过低</strong>满载工况下，偏频 n_f='+nf.toFixed(2)+' Hz 低于推荐范围，操控稳定性不足。';
+    }else if(Math.abs(dn)>0.8){
+      vd2.className='vr warn';
+      vd2.innerHTML='<strong>⚠ 偏频变化较大</strong>负载变化时，偏频变化 Δn='+dn.toFixed(2)+' Hz，建议优化弹簧刚度。';
+    }else{
+      vd2.className='vr ok';
+      vd2.innerHTML='<strong>✓ 负载适应性良好</strong>空载至满载偏频变化合理，弹簧刚度设计合适。';
+    }
+  }
+}
+
+function draw(){
+  const cv=document.getElementById('cv');
+  const W=Math.max(600,window.innerWidth>768?900:window.innerWidth-32);
+  const H=Math.max(400,W*0.5);
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  const FCN=30,FCX=420,NN=0.3,NX=3.5;
+  const ml=70,mr=20,mt=30,mb=50;
+  const pw=W-ml-mr,ph=H-mt-mb;
+  const px=fc=>ml+(fc-FCN)/(FCX-FCN)*pw;
+  const py=n=>mt+ph-(n-NN)/(NX-NN)*ph;
+
+  const showGrid=document.getElementById('chk-grid').checked;
+  const showRange=document.getElementById('chk-range').checked;
+  showArr=document.getElementById('chk-arr').checked;
+
+  if(showGrid){
+    ctx.strokeStyle='rgba(58,69,85,0.3)';ctx.lineWidth=0.8;ctx.setLineDash([2,3]);
+    for(let fc=50;fc<=400;fc+=50){ctx.beginPath();ctx.moveTo(px(fc),mt);ctx.lineTo(px(fc),mt+ph);ctx.stroke();}
+    for(let n=0.5;n<=3.5;n+=0.5){ctx.beginPath();ctx.moveTo(ml,py(n));ctx.lineTo(ml+pw,py(n));ctx.stroke();}
+    ctx.setLineDash([]);
+  }
+
+  if(showRange&&mode===1){
+    const rng=vrng[vtype];
+    const fc1min=250/(rng.n1[1]*rng.n1[1]),fc1max=250/(rng.n1[0]*rng.n1[0]);
+    const fc2min=250/(rng.n2[1]*rng.n2[1]),fc2max=250/(rng.n2[0]*rng.n2[0]);
+    ctx.fillStyle='rgba(88,166,255,0.08)';
+    ctx.fillRect(px(fc1min),py(rng.n1[1]),px(fc1max)-px(fc1min),py(rng.n1[0])-py(rng.n1[1]));
+    ctx.fillStyle='rgba(63,185,80,0.08)';
+    ctx.fillRect(px(fc2min),py(rng.n2[1]),px(fc2max)-px(fc2min),py(rng.n2[0])-py(rng.n2[1]));
+  }
+
+  ctx.strokeStyle='rgba(227,179,65,0.7)';ctx.lineWidth=3;
+  ctx.beginPath();
+  for(let fc=FCN;fc<=FCX;fc+=0.5){
+    const n=fcToN(fc);
+    if(fc===FCN)ctx.moveTo(px(fc),py(n));else ctx.lineTo(px(fc),py(n));
+  }
+  ctx.stroke();
+
+  ctx.font='bold 16px JetBrains Mono,monospace';ctx.fillStyle='rgba(227,179,65,0.9)';ctx.textAlign='left';
+  ctx.fillText('n=√(250/fc)  式7-3',px(85)+5,py(fcToN(85))-12);
+
+  ctx.strokeStyle='#3a4555';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(ml,mt);ctx.lineTo(ml,mt+ph);ctx.lineTo(ml+pw,mt+ph);ctx.stroke();
+  ctx.font='16px JetBrains Mono,monospace';ctx.fillStyle='#9ca8b8';ctx.textAlign='center';
+  [50,100,150,200,250,300,350,400].forEach(fc=>ctx.fillText(fc,px(fc),mt+ph+22));
+  ctx.fillText('静挠度 fc (mm)',ml+pw/2,H-6);
+  ctx.textAlign='right';
+  [0.5,1.0,1.5,2.0,2.5,3.0,3.5].forEach(n=>ctx.fillText(n.toFixed(1),ml-8,py(n)+5));
+  ctx.save();ctx.translate(16,mt+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('偏频 n (Hz)',0,0);ctx.restore();
+
+  if(mode===1){
+    const fc1=+document.getElementById('sl-fc1').value;
+    const fc2=+document.getElementById('sl-fc2').value;
+    const n1=fcToN(fc1),n2=fcToN(fc2);
+
+    ctx.setLineDash([5,4]);
+    [[fc1,n1,'#58a6ff'],[fc2,n2,'#3fb950']].forEach(([fc,n,col])=>{
+      ctx.strokeStyle=col.replace('#','rgba('+hexRGB(col)+',0.6)');ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(px(fc),py(n));ctx.lineTo(px(fc),mt+ph);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ml,py(n));ctx.lineTo(px(fc),py(n));ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    if(Math.abs(fc1-fc2)>5){
+      ctx.strokeStyle='rgba(188,140,255,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(px(fc1),py(n1));ctx.lineTo(px(fc2),py(n2));ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='bold 15px JetBrains Mono,monospace';ctx.fillStyle='rgba(188,140,255,.9)';ctx.textAlign='center';
+      ctx.fillText('n₁/n₂='+(n1/n2).toFixed(3),(px(fc1)+px(fc2))/2,(py(n1)+py(n2))/2-10);
+    }
+
+    dot(ctx,px(fc1),py(n1),9,'#58a6ff');
+    lbl(ctx,px(fc1),py(n1),'前 fc1='+fc1+'mm','n₁='+n1.toFixed(3)+' Hz','#58a6ff',fc1>250?-1:1,0);
+    dot(ctx,px(fc2),py(n2),9,'#3fb950');
+    lbl(ctx,px(fc2),py(n2),'后 fc2='+fc2+'mm','n₂='+n2.toFixed(3)+' Hz','#3fb950',fc2>250?-1:1,22);
+  }
+
+  if(mode===2){
+    const {c,m0,mf}=s2;
+    const fc0=cmToFc(m0,c),fcf=cmToFc(mf,c);
+    const n0=fcToN(fc0),nf=fcToN(fcf);
+    const flo=Math.max(FCN,Math.min(fc0,fcf)),fhi=Math.min(FCX,Math.max(fc0,fcf));
+
+    ctx.strokeStyle='rgba(227,179,65,0.5)';ctx.lineWidth=12;ctx.lineCap='round';
+    ctx.beginPath();
+    for(let fc=flo;fc<=fhi;fc+=0.5){const n=fcToN(fc);fc===flo?ctx.moveTo(px(fc),py(n)):ctx.lineTo(px(fc),py(n));}
+    ctx.stroke();ctx.lineCap='butt';
+
+    ctx.setLineDash([5,4]);
+    [[fc0,n0,'#f85149'],[fcf,nf,'#3fb950']].forEach(([fc,n,col])=>{
+      ctx.strokeStyle=col.replace('#','rgba('+hexRGB(col)+',0.6)');ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(px(fc),py(n));ctx.lineTo(px(fc),mt+ph);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ml,py(n));ctx.lineTo(px(fc),py(n));ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    if(showArr&&Math.abs(fc0-fcf)>8){
+      const ax=px(fcf),ay=py(nf),bx=px(fc0),by=py(n0);
+      ctx.strokeStyle='rgba(57,211,242,0.8)';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();ctx.setLineDash([]);
+      const ang=Math.atan2(by-ay,bx-ax);
+      ctx.fillStyle='rgba(57,211,242,0.9)';
+      ctx.beginPath();ctx.moveTo(bx,by);
+      ctx.lineTo(bx-14*Math.cos(ang-0.3),by-14*Math.sin(ang-0.3));
+      ctx.lineTo(bx-14*Math.cos(ang+0.3),by-14*Math.sin(ang+0.3));
+      ctx.closePath();ctx.fill();
+      ctx.font='bold 16px JetBrains Mono,monospace';ctx.fillStyle='rgba(57,211,242,0.9)';ctx.textAlign='center';
+      ctx.fillText('满载→空载',(ax+bx)/2,(ay+by)/2-18);
+      ctx.font='14px JetBrains Mono,monospace';
+      ctx.fillText('Δn=+'+(n0-nf).toFixed(2)+' Hz',(ax+bx)/2,(ay+by)/2+2);
+    }
+
+    dot(ctx,px(fc0),py(n0),10,'#f85149');
+    lbl(ctx,px(fc0),py(n0),'①空载 fc='+fc0.toFixed(0)+'mm','n₀='+n0.toFixed(3)+' Hz ⚠','#f85149',fc0>250?-1:1,0);
+    dot(ctx,px(fcf),py(nf),10,'#3fb950');
+    lbl(ctx,px(fcf),py(nf),'②满载 fc='+fcf.toFixed(0)+'mm','n_f='+nf.toFixed(3)+' Hz','#3fb950',fcf>250?-1:1,22);
+
+    ctx.font='15px JetBrains Mono,monospace';ctx.fillStyle='rgba(227,179,65,0.7)';ctx.textAlign='left';
+    ctx.fillText('c='+fk(c)+' N/m（固定）',px(FCN+10)+4,py(NX-0.25));
+  }
+}
+
+function dot(ctx,x,y,r,fill){
+  ctx.fillStyle=fill;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#0a0e14';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();
+}
+function lbl(ctx,x,y,l1,l2,col,dir,yoff){
+  const sign=dir<0?-1:1;const lx=x+sign*12;const ly=y-16+yoff;
+  ctx.font='bold 15px JetBrains Mono,monospace';ctx.fillStyle=col;
+  ctx.textAlign=dir<0?'right':'left';ctx.fillText(l1,lx,ly);
+  ctx.font='14px JetBrains Mono,monospace';ctx.fillStyle=col;ctx.globalAlpha=0.85;
+  ctx.fillText(l2,lx,ly+18);ctx.globalAlpha=1;
+}
+function hexRGB(h){
+  if(h.startsWith('rgba')||h.startsWith('rgb'))return '88,166,255';
+  if(h==='#58a6ff')return'88,166,255';if(h==='#3fb950')return'63,185,80';
+  if(h==='#f85149')return'248,81,73';if(h==='#bc8cff')return'188,140,255';
+  if(h==='#39d3f2')return'57,211,242';
+  const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+  return r+','+g+','+b;
+}
+function fk(n){return n>=1000?(n/1000).toFixed(1)+'k':n;}
+
+document.getElementById('cv').addEventListener('mousemove',function(e){
+  const r=this.getBoundingClientRect();
+  const W=this.width,H=this.height;
+  const FCN=30,FCX=420;const ml=70,mr=20,mt=30,mb=50;const pw=W-ml-mr,ph=H-mt-mb;
+  const x=e.clientX-r.left,y=e.clientY-r.top;
+  const tt=document.getElementById('tt');
+  if(x<ml||x>ml+pw||y<mt||y>mt+ph){tt.style.display='none';return;}
+  const fc=FCN+(x-ml)/pw*(FCX-FCN);
+  if(fc<FCN||fc>FCX){tt.style.display='none';return;}
+  const n=fcToN(fc);
+  tt.style.display='block';tt.style.left=(e.clientX+16)+'px';tt.style.top=(e.clientY-50)+'px';
+  tt.innerHTML='<span style="color:var(--yellow);font-weight:700">式7-3</span><br>fc=<b style="color:var(--yellow)">'+fc.toFixed(1)+'mm</b><br>n=√(250/'+fc.toFixed(1)+')=<b style="color:var(--yellow)">'+n.toFixed(4)+' Hz</b>';
+});
+document.getElementById('cv').addEventListener('mouseleave',()=>document.getElementById('tt').style.display='none');
+
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(draw,100);});
+window.addEventListener('load',()=>{setVType('car_small');setPreset('truck');setMode(1);calcReverse();});
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+if (e.key === 'F12' || 
+(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+(e.ctrlKey && e.key === 'U') ||
+(e.ctrlKey && e.key === 'S')) {
+e.preventDefault();
+return false;
+}
+});
+
+</script>
+<script>
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'U') ||
+        (e.ctrlKey && e.key === 'S')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+</script>
+
+</body>
+</html>
