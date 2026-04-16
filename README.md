@@ -1,0 +1,1 @@
+# Suspension-Static-Deflection-and-Natural-Frequency-Eq.-7-1-
