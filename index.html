@@ -114,7 +114,7 @@ canvas{display:block;max-width:100%}
 @media (min-width:769px){
   body{display:flex;flex-direction:column;height:100vh}
   .main{display:flex;flex-direction:row;flex:1;overflow:hidden}
-  .lp{width:420px;flex-shrink:0;border-right:2px solid var(--border);border-bottom:none;overflow-y:auto}
+  .lp{width:460px;flex-shrink:0;border-right:2px solid var(--border);border-bottom:none;overflow-y:auto}
   .rp{flex:1;display:flex;flex-direction:column;overflow:hidden}
   .cw{flex:1;overflow:auto}
 }
@@ -243,6 +243,7 @@ user-select: none
 </div>
 
 <div id="pm2" style="display:none">
+  <!-- 快速预设 -->
   <div class="card">
     <div class="ct">快速预设（货车场景）</div>
     <div class="pr">
@@ -252,38 +253,32 @@ user-select: none
     </div>
   </div>
 
+  <!-- 第一行：线性弹簧刚度 -->
   <div class="card">
     <div class="ct">线性弹簧刚度 c</div>
-    <div class="slr">
-      <div class="slh">
-        <span class="sll">刚度系数 c</span>
-        <span><span class="slv" id="v-c">18000</span><span class="slu">N/m</span></span>
-      </div>
-      <input type="range" class="sye" id="sl-c" min="5000" max="80000" value="18000" step="500" oninput="updateS2('c',this.value)">
-      <div class="tr"><span>5k</span><span>80k</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+      <span style="font-size:18px;font-weight:700;color:var(--yellow);white-space:nowrap">刚度系数 c</span>
+      <input type="number" class="ni" id="sl-c" min="100" max="500000" value="18000" step="100" oninput="updateS2('c',this.value)" style="flex:1;min-width:0;font-size:22px;padding:10px 12px">
+      <span style="font-size:18px;color:var(--muted);white-space:nowrap">N/m</span>
     </div>
   </div>
 
+  <!-- 第二行：簧上质量 -->
   <div class="card">
-    <div class="ct">簧载质量 m</div>
-    <div class="slr">
-      <div class="slh">
-        <span class="sll">①空载质量 m₀</span>
-        <span><span class="slv srd" id="v-m0">500</span><span class="slu">kg</span></span>
-      </div>
-      <input type="range" class="srd" id="sl-m0" min="200" max="3000" value="500" step="10" oninput="updateS2('m0',this.value)">
-      <div class="tr"><span>200</span><span>3000</span></div>
+    <div class="ct">簧上质量 M</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+      <span style="font-size:18px;font-weight:700;color:var(--red);white-space:nowrap">①空载质量 m₀</span>
+      <input type="number" class="ni" id="sl-m0" min="1" max="50000" value="500" step="1" oninput="updateS2('m0',this.value)" style="flex:1;min-width:0;font-size:22px;padding:10px 12px">
+      <span style="font-size:18px;color:var(--muted);white-space:nowrap">kg</span>
     </div>
-    <div class="slr" style="margin-top:12px">
-      <div class="slh">
-        <span class="sll">②满载质量 m_f</span>
-        <span><span class="slv sgr" id="v-mf">1200</span><span class="slu">kg</span></span>
-      </div>
-      <input type="range" class="sgr" id="sl-mf" min="200" max="3000" value="1200" step="10" oninput="updateS2('mf',this.value)">
-      <div class="tr"><span>200</span><span>3000</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+      <span style="font-size:18px;font-weight:700;color:var(--green);white-space:nowrap">②满载质量 m_f</span>
+      <input type="number" class="ni" id="sl-mf" min="1" max="50000" value="1200" step="1" oninput="updateS2('mf',this.value)" style="flex:1;min-width:0;font-size:22px;padding:10px 12px">
+      <span style="font-size:18px;color:var(--muted);white-space:nowrap">kg</span>
     </div>
   </div>
 
+  <!-- 第三行：偏频变化分析 -->
   <div class="card">
     <div class="ct">偏频变化分析</div>
     <div class="rrow">
@@ -373,7 +368,7 @@ function setMode(m){
   document.getElementById('m1b').classList.toggle('active',m===1);
   document.getElementById('m2b').classList.toggle('active',m===2);
   document.getElementById('pm1').style.display=m===1?'flex':'none';
-  document.getElementById('pm2').style.display=m===2?'flex':'none';
+  document.getElementById('pm2').style.display=m===2?'block':'none';
   document.getElementById('tg-arr').style.display=m===2?'flex':'none';
   draw();updateInfo();
 }
@@ -393,7 +388,13 @@ function setPreset(p){
   if(p in presets){
     const pr=presets[p];
     if('fc1'in pr){updateSlider('fc1',pr.fc1);updateSlider('fc2',pr.fc2);}
-    if('c'in pr){updateS2('c',pr.c);updateS2('m0',pr.m0);updateS2('mf',pr.mf);}
+    if('c'in pr){
+      s2.c=pr.c; s2.m0=pr.m0; s2.mf=pr.mf;
+      document.getElementById('sl-c').value=pr.c;
+      document.getElementById('sl-m0').value=pr.m0;
+      document.getElementById('sl-mf').value=pr.mf;
+      updateInfo();draw();
+    }
   }
 }
 
@@ -414,8 +415,6 @@ function updateInput(which,val){
 
 function updateS2(which,val){
   s2[which]=+val;
-  document.getElementById('v-'+which).textContent=Math.round(val);
-  document.getElementById('sl-'+which).value=val;
   updateInfo();draw();
 }
 
@@ -628,7 +627,7 @@ function draw(){
     lbl(ctx,px(fcf),py(nf),'②满载 fc='+fcf.toFixed(0)+'mm','n_f='+nf.toFixed(3)+' Hz','#3fb950',fcf>250?-1:1,22);
 
     ctx.font='15px JetBrains Mono,monospace';ctx.fillStyle='rgba(227,179,65,0.7)';ctx.textAlign='left';
-    ctx.fillText('c='+fk(c)+' N/m（固定）',px(FCN+10)+4,py(NX-0.25));
+    ctx.fillText('c='+fk(c)+' N/m',px(FCN+10)+4,py(NX-0.25));
   }
 }
 
